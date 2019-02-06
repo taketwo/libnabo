@@ -7,6 +7,11 @@ endif ()
 set(LIB_NAME nabo)
 project("lib${LIB_NAME}")
 
+option(BUILD_DOCS "Build documentation" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
+
 # Extract version from header
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 execute_process(
@@ -38,10 +43,6 @@ endif (NOT CMAKE_BUILD_TYPE)
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-O3)
 endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-
-# Documentation
-set(DOXYFILE_LATEX false)
-include(UseDoxygen)
 
 # Switch on warnings.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -153,20 +154,31 @@ else (SHARED_LIBS)
 endif (SHARED_LIBS)
 set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
+# Documentation
+if(BUILD_DOCS)
+  set(DOXYFILE_LATEX false)
+  include(UseDoxygen)
 # create doc before installing
-set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
-install(FILES nabo/nabo.h DESTINATION include/nabo)
-install(FILES nabo/third_party/any.hpp DESTINATION include/nabo/third_party)
-install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
-if (DOXYGEN_FOUND)
-	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
-endif (DOXYGEN_FOUND)
+  set(DOC_INSTALL_TARGET "share/doc/${PROJECT_NAME}/api" CACHE STRING "Target where to install doxygen documentation")
+  install(FILES nabo/nabo.h DESTINATION include/nabo)
+  install(FILES nabo/third_party/any.hpp DESTINATION include/nabo/third_party)
+  install(FILES README.md DESTINATION share/doc/${PROJECT_NAME})
+  if(DOXYGEN_FOUND)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOC_INSTALL_TARGET})
+  endif (DOXYGEN_FOUND)
+endif()
 
-enable_testing()
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif()
 
-add_subdirectory(examples)
-add_subdirectory(tests)
-add_subdirectory(python)
+if(BUILD_PYTHON_BINDINGS)
+  add_subdirectory(python)
+endif()
+
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 # Install catkin package.xml
 install(FILES package.xml DESTINATION share/libnabo)
