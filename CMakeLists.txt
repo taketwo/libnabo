@@ -100,16 +100,8 @@ if (USE_OPEN_MP)
 	endif(OPENMP_FOUND)
 endif (USE_OPEN_MP)
 
-# eigen 2 or 3
-find_path(EIGEN_INCLUDE_DIR Eigen/Core
-	/usr/local/include/eigen3
-	/usr/local/include/eigen2
-	/usr/local/include/eigen
-	/usr/include/eigen3
-	/usr/include/eigen2
-	/usr/include/eigen
-	/opt/local/include/eigen3
-)
+# eigen 3
+find_package(Eigen3)
 
 # optionally, opencl
 # OpenCL disabled as its code is not up-to-date with API
@@ -141,7 +133,7 @@ else (USE_OPEN_CL)
 endif (USE_OPEN_CL)
 
 # include all libs so far
-include_directories(${CMAKE_SOURCE_DIR} ${EIGEN_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR} ${EIGEN3_INCLUDE_DIR})
 
 # main nabo lib
 set(NABO_SRC
